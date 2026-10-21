@@ -1,1 +1,840 @@
+<!DOCTYPE html><html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#071a30">
+<meta name="description" content="BusRadar — rozkłady jazdy autobusów, przystanki, linie i mapy Sulejówka oraz Mińska Mazowieckiego.">
+<title>BusRadar | Sulejówek i Mińsk Mazowiecki</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>
+:root {
+  --bg: #071321;
+  --panel: #0c2238;
+  --panel2: #102b46;
+  --blue: #087df5;
+  --text: #f4f8ff;
+  --muted: #a8bdd3;
+  --border: #1c3d5d;
+}
 
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+header {
+  min-height: 72px;
+  background: #06182c;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 4%;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.logo small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+nav button {
+  color: #d9e8fa;
+  background: transparent;
+  border: 0;
+  padding: 12px 15px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+nav button.active,
+nav button:hover {
+  background: var(--blue);
+  color: white;
+}
+
+.clock {
+  color: var(--muted);
+  font-size: 13px;
+  text-align: right;
+}
+
+main {
+  max-width: 1450px;
+  margin: auto;
+  padding: 24px;
+}
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}
+
+.hero {
+  padding: 55px 24px;
+  text-align: center;
+  border-radius: 16px;
+  background:
+    linear-gradient(110deg, #06182b, #103d65);
+  border: 1px solid var(--border);
+}
+
+.hero h1 {
+  font-size: clamp(28px, 5vw, 48px);
+  margin: 0 0 12px;
+}
+
+.hero p {
+  color: #d2e5f9;
+  line-height: 1.6;
+}
+
+.search {
+  display: flex;
+  max-width: 680px;
+  margin: 25px auto 0;
+  gap: 8px;
+}
+
+input, select {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid #345779;
+  border-radius: 8px;
+  background: #081b2f;
+  color: white;
+  font-size: 15px;
+}
+
+.search input {
+  flex: 1;
+}
+
+.primary {
+  background: var(--blue);
+  color: white;
+  border: 0;
+  border-radius: 8px;
+  padding: 13px 20px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.primary:hover {
+  background: #0068d7;
+}
+
+.shortcuts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin: 22px 0 30px;
+}
+
+.shortcut {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 23px 12px;
+  color: white;
+  cursor: pointer;
+  text-align: center;
+  font-size: 16px;
+}
+
+.shortcut span {
+  display: block;
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+.shortcut:hover {
+  border-color: var(--blue);
+  transform: translateY(-2px);
+}
+
+h2 {
+  font-size: 22px;
+  margin: 22px 0 15px;
+}
+
+h3 {
+  margin-top: 0;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr);
+  gap: 20px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 18px;
+  min-width: 0;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.departure {
+  display: grid;
+  grid-template-columns: 65px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.departure:last-child {
+  border-bottom: 0;
+}
+
+.badge {
+  display: inline-block;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  padding: 7px 9px;
+  min-width: 48px;
+  border-radius: 6px;
+}
+
+.a1 { background: #087df5; }
+.p02 { background: #ef452c; }
+.p03 { background: #8047d8; }
+.w3 { background: #008957; }
+
+.departure-time {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.departure-time strong {
+  display: block;
+  color: #53e6a0;
+  margin-bottom: 5px;
+}
+
+.line-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin: 10px 0;
+  cursor: pointer;
+}
+
+.line-card:hover {
+  border-color: var(--blue);
+}
+
+.line-card p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 15px 0;
+}
+
+.toolbar button {
+  border: 1px solid var(--border);
+  background: var(--panel2);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.toolbar button.active {
+  background: var(--blue);
+}
+
+#map {
+  height: 470px;
+  border-radius: 10px;
+  z-index: 1;
+}
+
+.map-panel {
+  overflow: hidden;
+}
+
+.stop {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.stop:last-child {
+  border-bottom: 0;
+}
+
+footer {
+  margin-top: 35px;
+  padding: 25px;
+  text-align: center;
+  background: #06182c;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.notice {
+  padding: 12px;
+  background: #173654;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #d7eaff;
+  line-height: 1.6;
+  margin-top: 15px;
+}
+
+.empty {
+  padding: 22px;
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (max-width: 850px) {
+  header {
+    justify-content: center;
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .shortcuts {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  main {
+    padding: 14px;
+  }
+
+  .hero {
+    padding: 35px 15px;
+  }
+
+  nav {
+    justify-content: center;
+  }
+
+  .clock {
+    display: none;
+  }
+}
+
+@media (max-width: 450px) {
+  nav button {
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  .departure {
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    gap: 7px;
+    font-size: 12px;
+  }
+
+  .departure-time {
+    font-size: 11px;
+  }
+
+  .search {
+    flex-direction: column;
+  }
+
+  .search input,
+  .search button {
+    width: 100%;
+  }
+
+  #map {
+    height: 360px;
+  }
+}
+</style></head><body><header>
+  <div class="logo">
+    🚌 BusRadar
+    <small>Sulejówek i Mińsk Mazowiecki</small>
+  </div>  <nav>
+    <button class="active" data-page="start">Start</button>
+    <button data-page="rozklady">Rozkłady</button>
+    <button data-page="linie">Linie</button>
+    <button data-page="mapy">Mapy</button>
+    <button data-page="pojazdy">Pojazdy</button>
+  </nav>  <div class="clock">
+    <strong id="clock">--:--:--</strong>
+    <br>
+    <span id="date"></span>
+  </div>
+</header><main><section id="start" class="page active">
+  <div class="hero">
+    <h1>Witaj w BusRadar!</h1>
+    <p>Rozkłady jazdy, trasy i komunikacja autobusowa<br>
+    Sulejówek • Mińsk Mazowiecki</p><div class="search">
+  <input id="searchStop" placeholder="🔎 Wpisz nazwę przystanku...">
+  <button class="primary" onclick="searchStops()">Szukaj</button>
+</div>
+
+  </div>  <div class="shortcuts">
+    <button class="shortcut" onclick="showPage('rozklady')">
+      <span>🚏</span>Przystanki
+    </button>
+    <button class="shortcut" onclick="showPage('linie')">
+      <span>🚌</span>Linie
+    </button>
+    <button class="shortcut" onclick="showPage('mapy')">
+      <span>🗺️</span>Mapy
+    </button>
+    <button class="shortcut" onclick="showPage('pojazdy')">
+      <span>📍</span>Pojazdy
+    </button>
+  </div>  <div class="layout">
+    <div class="panel">
+      <h2>Najbliższe odjazdy</h2>
+      <p class="muted">Przykładowe dane demonstracyjne</p>
+      <div id="homeDepartures"></div>
+    </div><div>
+  <div class="panel">
+    <h3>🔵 Informacje</h3>
+    <p>Wybierz przystanek, sprawdź rozkład lub przejdź do mapy tras.</p>
+    <div class="notice">
+      Odjazdy prezentowane na stronie są przykładowe. Nie są połączone z systemem GPS.
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>🚌 Komunikacja miejska</h3>
+    <p class="muted">Sulejówek i okolice Mińska Mazowieckiego</p>
+  </div>
+</div>
+
+  </div>
+</section><section id="rozklady" class="page">
+  <h1>🚏 Odjazdy z przystanku</h1>  <div class="panel">
+    <input id="stopFilter" style="width:100%" placeholder="Wyszukaj przystanek..." oninput="renderStops()"><div class="toolbar" id="lineFilters">
+  <button class="active" data-line="ALL">Wszystkie linie</button>
+  <button data-line="A1">A1</button>
+  <button data-line="P02">P02</button>
+  <button data-line="P03">P03</button>
+  <button data-line="W3">W3</button>
+</div>
+
+<div id="stopResults"></div>
+
+  </div>
+</section><section id="linie" class="page">
+  <h1>🚌 Linie autobusowe</h1>
+  <p class="muted">Wybierz linię, aby zobaczyć jej trasę.</p>
+  <div id="lineList"></div>
+</section><section id="mapy" class="page">
+  <h1>🗺️ Mapa tras</h1>
+  <div class="panel map-panel">
+    <p>Mapa poglądowa okolic Sulejówka i Mińska Mazowieckiego.</p>
+    <div class="toolbar" id="mapFilters">
+      <button class="active" data-line="ALL">Wszystkie trasy</button>
+      <button data-line="A1">A1</button>
+      <button data-line="P02">P02</button>
+      <button data-line="P03">P03</button>
+      <button data-line="W3">W3</button>
+    </div>
+    <div id="map"></div>
+    <p class="muted">Mapa bazowa © OpenStreetMap contributors. Linie są schematyczne.</p>
+  </div>
+</section><section id="pojazdy" class="page">
+  <h1>📍 Pojazdy</h1>
+  <p class="muted">Przykładowa lista pojazdów — nie przedstawia rzeczywistej lokalizacji GPS.</p>
+  <div class="panel" id="vehicleList"></div>
+</section></main><footer>
+  🚌 BusRadar • Sulejówek i Mińsk Mazowiecki<br><br>
+  Niezależny projekt informacyjny. Przykładowe rozkłady nie są oficjalnym źródłem informacji pasażerskiej.
+</footer><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>
+const lines = {
+  A1: {
+    color: "#087df5",
+    css: "a1",
+    direction: "PKP Sulejówek Miłosna",
+    vehicle: "TK331FJ",
+    times: ["05:47", "06:16", "06:47", "07:13", "07:37", "08:19", "08:43", "09:19", "10:17", "11:34", "12:37", "13:48", "14:39", "15:33", "16:34", "17:05", "17:34", "18:05", "18:34", "19:05", "20:05", "21:05"]
+  },
+
+  P02: {
+    color: "#ef452c",
+    css: "p02",
+    direction: "Okuniew / Rynek",
+    vehicle: "B013",
+    times: ["06:10", "07:05", "08:15", "09:25", "11:20", "13:10", "14:35", "15:45", "17:05", "18:20"]
+  },
+
+  P03: {
+    color: "#8047d8",
+    css: "p03",
+    direction: "Michałów-Pętla",
+    vehicle: "B011",
+    times: ["06:20", "07:20", "08:30", "10:00", "12:10", "13:30", "15:00", "16:15", "17:30", "18:40"]
+  },
+
+  W3: {
+    color: "#008957",
+    css: "w3",
+    direction: "Kolejowa",
+    vehicle: "WG6102L",
+    times: ["06:00", "07:00", "08:00", "09:00", "11:00", "13:00", "15:00", "16:00", "17:00", "18:00"]
+  }
+};
+
+const stops = [
+  {name: "Łukasińskiego 01", lines: ["A1", "P02", "P03", "W3"]},
+  {name: "Łukasińskiego 02", lines: ["A1", "P02"]},
+  {name: "Szosowa 01", lines: ["A1", "W3"]},
+  {name: "Szosowa 02", lines: ["A1"]},
+  {name: "Michałów-Pętla 01", lines: ["P03"]},
+  {name: "Rynek (Stanisławów) 01", lines: ["P02", "P03"]},
+  {name: "PKP Sulejówek Miłosna 01", lines: ["A1", "W3"]},
+  {name: "PKP Mińsk Mazowiecki", lines: ["P02", "P03"]},
+  {name: "Dzielna 52", lines: ["P02", "P03"]},
+  {name: "Grabskiego 52", lines: ["P02", "P03"]},
+  {name: "Okuniew", lines: ["P02", "P03"]},
+  {name: "Kolejowa", lines: ["W3"]}
+];
+
+let selectedLine = "ALL";
+let map;
+let mapLayers = [];
+let mapInitialized = false;
+
+function updateClock() {
+  const now = new Date();
+
+  document.getElementById("clock").textContent =
+    now.toLocaleTimeString("pl-PL");
+
+  document.getElementById("date").textContent =
+    now.toLocaleDateString("pl-PL");
+}
+
+updateClock();
+setInterval(updateClock, 1000);
+
+function showPage(page) {
+  document.querySelectorAll(".page").forEach(p => {
+    p.classList.remove("active");
+  });
+
+  document.getElementById(page).classList.add("active");
+
+  document.querySelectorAll("nav button").forEach(b => {
+    b.classList.toggle("active", b.dataset.page === page);
+  });
+
+  if (page === "mapy") {
+    initMap();
+    setTimeout(() => map.invalidateSize(), 150);
+  }
+
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+document.querySelectorAll("nav button").forEach(button => {
+  button.addEventListener("click", () => showPage(button.dataset.page));
+});
+
+function getDepartures() {
+  const now = new Date();
+  const result = [];
+
+  Object.entries(lines).forEach(([code, line]) => {
+    line.times.forEach(time => {
+      const [h, m] = time.split(":").map(Number);
+      const departure = new Date();
+
+      departure.setHours(h, m, 0, 0);
+
+      if (departure >= now) {
+        result.push({
+          code,
+          line,
+          time,
+          minutes: Math.ceil((departure - now) / 60000)
+        });
+      }
+    });
+  });
+
+  return result.sort((a, b) => a.minutes - b.minutes);
+}
+
+function departureHTML(item) {
+  const remaining = item.minutes === 0
+    ? "teraz"
+    : `za ${item.minutes} min`;
+
+  return `
+    <div class="departure">
+      <span class="badge ${item.line.css}">${item.code}</span>
+      <div>
+        <strong>${item.line.direction}</strong>
+        <div class="muted">${remaining}</div>
+      </div>
+      <div class="departure-time">
+        <strong>${item.time}</strong>
+        <span class="muted">odjazd</span>
+      </div>
+    </div>`;
+}
+
+function renderHome() {
+  const departures = getDepartures().slice(0, 8);
+  const target = document.getElementById("homeDepartures");
+
+  target.innerHTML = departures.length
+    ? departures.map(departureHTML).join("")
+    : '<div class="empty">Brak kolejnych przykładowych odjazdów dzisiaj.</div>';
+}
+
+function renderStops() {
+  const filter = document.getElementById("stopFilter").value.toLowerCase();
+
+  const filteredStops = stops.filter(stop => {
+    const matchesName = stop.name.toLowerCase().includes(filter);
+    const matchesLine = selectedLine === "ALL" ||
+      stop.lines.includes(selectedLine);
+
+    return matchesName && matchesLine;
+  });
+
+  const target = document.getElementById("stopResults");
+
+  target.innerHTML = filteredStops.length
+    ? filteredStops.map(stop => `
+      <div class="line-card" onclick="openStop('${stop.name.replace(/'/g, "\\'")}')">
+        <span>🚏</span>
+        <div>
+          <strong>${stop.name}</strong>
+          <p>Linie: ${stop.lines.join(", ")}</p>
+        </div>
+      </div>`).join("")
+    : '<div class="empty">Nie znaleziono przystanków.</div>';
+}
+
+function openStop(name) {
+  const stop = stops.find(s => s.name === name);
+  if (!stop) return;
+
+  const results = getDepartures()
+    .filter(d => stop.lines.includes(d.code))
+    .slice(0, 10);
+
+  document.getElementById("stopResults").innerHTML = `
+    <button class="primary" onclick="renderStops()">← Powrót do przystanków</button>
+    <h2>${stop.name}</h2>
+    <p class="muted">Obsługiwane linie: ${stop.lines.join(", ")}</p>
+    ${results.length
+      ? results.map(departureHTML).join("")
+      : '<div class="empty">Brak kolejnych odjazdów w przykładowym rozkładzie.</div>'}
+  `;
+}
+
+document.querySelectorAll("#lineFilters button").forEach(button => {
+  button.addEventListener("click", () => {
+    selectedLine = button.dataset.line;
+
+    document.querySelectorAll("#lineFilters button").forEach(b => {
+      b.classList.toggle("active", b === button);
+    });
+
+    renderStops();
+  });
+});
+
+function renderLines() {
+  document.getElementById("lineList").innerHTML =
+    Object.entries(lines).map(([code, line]) => `
+      <div class="line-card" onclick="selectMapLine('${code}')">
+        <span class="badge ${line.css}">${code}</span>
+        <div>
+          <strong>${line.direction}</strong>
+          <p>Pojazd przykładowy: ${line.vehicle}</p>
+        </div>
+        <span style="margin-left:auto">›</span>
+      </div>`).join("");
+}
+
+function renderVehicles() {
+  document.getElementById("vehicleList").innerHTML =
+    Object.entries(lines).map(([code, line]) => `
+      <div class="departure">
+        <span style="font-size:25px">🚌</span>
+        <div>
+          <strong>${line.vehicle}</strong>
+          <div class="muted">Linia ${code} • ${line.direction}</div>
+        </div>
+        <span class="muted">DEMO</span>
+      </div>`).join("");
+}
+
+const routeCoordinates = {
+  A1: [
+    [52.244, 21.180],
+    [52.241, 21.190],
+    [52.239, 21.200],
+    [52.237, 21.215]
+  ],
+  P02: [
+    [52.178, 21.572],
+    [52.190, 21.550],
+    [52.205, 21.525],
+    [52.220, 21.495]
+  ],
+  P03: [
+    [52.178, 21.572],
+    [52.195, 21.585],
+    [52.213, 21.600],
+    [52.230, 21.620]
+  ],
+  W3: [
+    [52.237, 21.215],
+    [52.245, 21.230],
+    [52.253, 21.245],
+    [52.260, 21.260]
+  ]
+};
+
+function initMap() {
+  if (mapInitialized) return;
+
+  const mapElement = document.getElementById("map");
+  if (!mapElement || typeof L === "undefined") {
+    mapElement.innerHTML = "Nie udało się załadować mapy. Sprawdź połączenie internetowe.";
+    return;
+  }
+
+  map = L.map("map").setView([52.225, 21.39], 11);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19
+  }).addTo(map);
+
+  mapInitialized = true;
+  drawRoutes("ALL");
+}
+
+function drawRoutes(code) {
+  if (!mapInitialized) return;
+
+  mapLayers.forEach(layer => map.removeLayer(layer));
+  mapLayers = [];
+
+  Object.entries(routeCoordinates).forEach(([lineCode, coords]) => {
+    if (code !== "ALL" && code !== lineCode) return;
+
+    const route = L.polyline(coords, {
+      color: lines[lineCode].color,
+      weight: 5,
+      opacity: 0.9
+    }).addTo(map);
+
+    route.bindPopup(`<strong>Linia ${lineCode}</strong><br>${lines[lineCode].direction}`);
+    mapLayers.push(route);
+
+    coords.forEach((coord, index) => {
+      const marker = L.circleMarker(coord, {
+        radius: 5,
+        color: lines[lineCode].color,
+        fillColor: "#ffffff",
+        fillOpacity: 1,
+        weight: 3
+      }).addTo(map);
+
+      marker.bindPopup(`Linia ${lineCode}<br>Przystanek ${index + 1}`);
+      mapLayers.push(marker);
+    });
+  });
+}
+
+document.querySelectorAll("#mapFilters button").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("#mapFilters button").forEach(b => {
+      b.classList.toggle("active", b === button);
+    });
+
+    drawRoutes(button.dataset.line);
+  });
+});
+
+function selectMapLine(code) {
+  showPage("mapy");
+
+  document.querySelectorAll("#mapFilters button").forEach(button => {
+    button.classList.toggle("active", button.dataset.line === code);
+  });
+
+  if (mapInitialized) drawRoutes(code);
+  else setTimeout(() => drawRoutes(code), 300);
+}
+
+function searchStops() {
+  const query = document.getElementById("searchStop").value.trim();
+
+  showPage("rozklady");
+  document.getElementById("stopFilter").value = query;
+  renderStops();
+}
+
+document.getElementById("searchStop").addEventListener("keydown", event => {
+  if (event.key === "Enter") searchStops();
+});
+
+renderHome();
+renderStops();
+renderLines();
+renderVehicles();
+
+setInterval(() => {
+  renderHome();
+
+  if (document.getElementById("rozklady").classList.contains("active")) {
+    const filter = document.getElementById("stopFilter").value;
+
+    if (filter === "") renderStops();
+  }
+}, 30000);
+</script></body>
+  </html>
