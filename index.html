@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#071a30">
 <meta name="description" content="BusRadar — rozkłady jazdy autobusów, przystanki, linie i mapy Sulejówka oraz Mińska Mazowieckiego.">
-<title>BusRadar | Sulejówek i Mińsk Mazowiecki</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>
+<title>BusRadar | Sulejówek i Mińsk Mazowiecki (PGZTPPM)</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>
 :root {
   --bg: #071321;
   --panel: #0c2238;
@@ -391,7 +391,7 @@ footer {
 </style></head><body><header>
   <div class="logo">
     🚌 BusRadar
-    <small>Sulejówek i Mińsk Mazowiecki</small>
+    <small>Sulejówek i Mińsk Mazowiecki (PGZTPPM)</small>
   </div>  <nav>
     <button class="active" data-page="start">Start</button>
     <button data-page="rozklady">Rozkłady</button>
@@ -407,7 +407,7 @@ footer {
   <div class="hero">
     <h1>Witaj w BusRadar!</h1>
     <p>Rozkłady jazdy, trasy i komunikacja autobusowa<br>
-    Sulejówek • Mińsk Mazowiecki</p><div class="search">
+    Sulejówek • Mińsk Mazowiecki (PGZTPPM)</p><div class="search">
   <input id="searchStop" placeholder="🔎 Wpisz nazwę przystanku...">
   <button class="primary" onclick="searchStops()">Szukaj</button>
 </div>
@@ -451,9 +451,10 @@ footer {
     <input id="stopFilter" style="width:100%" placeholder="Wyszukaj przystanek..." oninput="renderStops()"><div class="toolbar" id="lineFilters">
   <button class="active" data-line="ALL">Wszystkie linie</button>
   <button data-line="A1">A1</button>
+  <button data-line="A2">A2</button>
+  <button data-line="W3">W3</button>
   <button data-line="P02">P02</button>
   <button data-line="P03">P03</button>
-  <button data-line="W3">W3</button>
 </div>
 
 <div id="stopResults"></div>
@@ -466,13 +467,14 @@ footer {
 </section><section id="mapy" class="page">
   <h1>🗺️ Mapa tras</h1>
   <div class="panel map-panel">
-    <p>Mapa poglądowa okolic Sulejówka i Mińska Mazowieckiego.</p>
+    <p>Mapa poglądowa okolic Sulejówka i Mińska Mazowieckiego (PGZTPPM).</p>
     <div class="toolbar" id="mapFilters">
       <button class="active" data-line="ALL">Wszystkie trasy</button>
       <button data-line="A1">A1</button>
+      <button data-line="A2">A2</button>
+      <button data-line="W3">W3</button>
       <button data-line="P02">P02</button>
       <button data-line="P03">P03</button>
-      <button data-line="W3">W3</button>
     </div>
     <div id="map"></div>
     <p class="muted">Mapa bazowa © OpenStreetMap contributors. Linie są schematyczne.</p>
@@ -482,7 +484,7 @@ footer {
   <p class="muted">Przykładowa lista pojazdów — nie przedstawia rzeczywistej lokalizacji GPS.</p>
   <div class="panel" id="vehicleList"></div>
 </section></main><footer>
-  🚌 BusRadar • Sulejówek i Mińsk Mazowiecki<br><br>
+  🚌 BusRadar • Sulejówek i Mińsk Mazowiecki (PGZTPPM)<br><br>
   Niezależny projekt informacyjny. Przykładowe rozkłady nie są oficjalnym źródłem informacji pasażerskiej.
 </footer><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>
 const lines = {
